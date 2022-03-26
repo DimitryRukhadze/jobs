@@ -82,9 +82,11 @@ def get_vacancies_hh(prog_language):
         page_response = requests.get(vacancies_url, params=params)
         page_response.raise_for_status()
 
+        new_vacancies = page_response.json()['items']
+
         [
             hh_vacancies.append(vacancy)
-            for vacancy in page_response.json()['items']
+            for vacancy in new_vacancies
             ]
 
     return response.json()['found'], hh_vacancies, city, website
@@ -136,9 +138,11 @@ def get_vacancies_sj(prog_lang):
             )
         page_response.raise_for_status()
 
+        new_vacancies = page_response.json()['objects']
+
         [
             sj_vacancies.append(vacancy)
-            for vacancy in page_response.json()['objects']
+            for vacancy in new_vacancies
             ]
 
     return response.json()['total'], sj_vacancies, city, website
