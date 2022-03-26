@@ -185,10 +185,13 @@ def predict_rub_salary_for_sj(vacancy):
 
 def make_vacancies_stats_by_lang(language, vacancy_getter, salary_predicter, key_for_getter=''):
 
-    lang_stats={}
+    lang_stats = {}
 
     if vacancy_getter == get_vacancies_from_sj:
-        jobs_found, language_jobs, city, website = vacancy_getter(language, key_for_getter)
+        jobs_found, language_jobs, city, website = vacancy_getter(
+            language,
+            key_for_getter
+            )
 
     else:
         jobs_found, language_jobs, city, website = vacancy_getter(language)
@@ -218,7 +221,7 @@ def make_dict_of_jobs(dict_tempate, job_getter, salary_predicter, secret_key='')
                 lang,
                 job_getter,
                 salary_predicter,
-                key_for_getter = secret_key
+                key_for_getter=secret_key
                 )
 
             if lang == 'city':
@@ -292,4 +295,3 @@ if __name__ == '__main__':
 
     print_terminal_table(hh_jobs)
     print_terminal_table(sj_jobs)
-
