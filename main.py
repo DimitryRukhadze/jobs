@@ -258,7 +258,7 @@ if __name__ == '__main__':
 
     try:
         sj_jobs = make_dict_of_jobs(
-            languages,
+            stats_template,
             get_vacancies_sj,
             predict_rub_salary_sj
             )
