@@ -36,7 +36,7 @@ def get_area_id_hh(country_name, area_name, region_name='')
 
 Получает с API Headhunter id города, по которому проводится поиск. На вход принимает название страны, города и региона (необязательный параметр).
 
-def make_terminal_table(table_params)
+def print_terminal_table(table_params)
 ---
 
 Выводит в терминал ascii таблицу. На вход принимает словарь со значениями для таблицы.
@@ -73,7 +73,7 @@ def predict_rub_salary_sj(vacancy)
 Высчитывает среднюю зарплату по вакансиям с API Headhunter. Использует функцию `predict_salary`. На вход принимает одну вакансию.
 Работает только с зарплатами в рублях.
 
-def vacancies_stats_by_language(language, vacancy_getter, salary_predicter)
+def make_vacancies_stats_by_lang(language, vacancy_getter, salary_predicter)
 ---
 
 формирует статистику по языкам программирования вакансий. Помимо статистики (Вакансий найдено, вакансий обработано, средняя зарплата),

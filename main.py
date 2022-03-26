@@ -183,7 +183,7 @@ def predict_rub_salary_sj(vacancy):
         return None
 
 
-def vacancies_stats_by_language(language, vacancy_getter, salary_predicter):
+def make_vacancies_stats_by_lang(language, vacancy_getter, salary_predicter):
 
     lang_stats = {
         'vacancies found': 0,
@@ -211,7 +211,7 @@ def make_dict_of_jobs(dict_tempate, job_getter, salary_predicter):
     langs = dict_tempate.copy()
 
     for lang in langs.keys():
-        stats = vacancies_stats_by_language(lang, job_getter, salary_predicter)
+        stats = make_vacancies_stats_by_lang(lang, job_getter, salary_predicter)
 
         if lang == 'city':
             langs[lang] = stats[1]
