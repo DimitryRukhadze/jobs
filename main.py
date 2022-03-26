@@ -185,11 +185,6 @@ def predict_rub_salary_sj(vacancy):
 
 def make_vacancies_stats_by_lang(language, vacancy_getter, salary_predicter):
 
-    lang_stats = {
-        'vacancies found': 0,
-        'vacancies processed': 0,
-        'average salary': 0,
-    }
 
     jobs_found, language_jobs, city, website = vacancy_getter(language)
 
@@ -200,9 +195,11 @@ def make_vacancies_stats_by_lang(language, vacancy_getter, salary_predicter):
     ]
 
     if all_salaries:
-        lang_stats['vacancies found'] = jobs_found
-        lang_stats['vacancies processed'] = len(all_salaries)
-        lang_stats['average salary'] = int(sum(all_salaries)/len(all_salaries))
+        lang_stats = {
+            'vacancies found': jobs_found,
+            'vacancies processed': len(all_salaries),
+            'average salary': int(sum(all_salaries)/len(all_salaries)),
+        }
 
     return [lang_stats, city, website]
 
