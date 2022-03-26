@@ -108,11 +108,9 @@ def get_vacancies_from_hh(prog_language):
     return response.json()['found'], hh_vacancies, city, website
 
 
-def get_vacancies_from_sj(prog_lang):
+def get_vacancies_from_sj(prog_lang, secret_key=''):
 
     auth_url = 'https://api.superjob.ru/2.0/vacancies/'
-
-    secret_key = environ.get('SUPERJOB_TOKEN')
 
     auth_header = {
         'X-Api-App-Id': secret_key
@@ -185,9 +183,15 @@ def predict_rub_salary_for_sj(vacancy):
             return medium_salary
 
 
-def make_vacancies_stats_by_lang(language, vacancy_getter, salary_predicter):
+def make_vacancies_stats_by_lang(language, vacancy_getter, salary_predicter, key_for_getter=''):
 
-    jobs_found, language_jobs, city, website = vacancy_getter(language)
+    lang_stats={}
+
+    if vacancy_getter == get_vacancies_from_sj:
+        jobs_found, language_jobs, city, website = vacancy_getter(language, key_for_getter)
+
+    else:
+        jobs_found, language_jobs, city, website = vacancy_getter(language)
 
     all_salaries = [
         salary_predicter(job)
@@ -205,22 +209,38 @@ def make_vacancies_stats_by_lang(language, vacancy_getter, salary_predicter):
     return [lang_stats, city, website]
 
 
-def make_dict_of_jobs(dict_tempate, job_getter, salary_predicter):
+def make_dict_of_jobs(dict_tempate, job_getter, salary_predicter, secret_key=''):
     langs = dict_tempate.copy()
 
-    for lang in langs.keys():
-        stats = make_vacancies_stats_by_lang(
-            lang,
-            job_getter,
-            salary_predicter
-            )
+    if job_getter == get_vacancies_from_sj:
+        for lang in langs.keys():
+            stats = make_vacancies_stats_by_lang(
+                lang,
+                job_getter,
+                salary_predicter,
+                key_for_getter = secret_key
+                )
 
-        if lang == 'city':
-            langs[lang] = stats[1]
-        elif lang == 'website':
-            langs[lang] = stats[2]
-        else:
-            langs[lang] = stats[0]
+            if lang == 'city':
+                langs[lang] = stats[1]
+            elif lang == 'website':
+                langs[lang] = stats[2]
+            else:
+                langs[lang] = stats[0]
+    else:
+        for lang in langs.keys():
+            stats = make_vacancies_stats_by_lang(
+                lang,
+                job_getter,
+                salary_predicter
+                )
+
+            if lang == 'city':
+                langs[lang] = stats[1]
+            elif lang == 'website':
+                langs[lang] = stats[2]
+            else:
+                langs[lang] = stats[0]
 
     return langs
 
@@ -228,6 +248,7 @@ def make_dict_of_jobs(dict_tempate, job_getter, salary_predicter):
 if __name__ == '__main__':
 
     load_dotenv()
+    sj_key = environ.get('SUPERJOB_TOKEN')
 
     stats_template = {
         'Javascript': 0,
@@ -259,7 +280,8 @@ if __name__ == '__main__':
         sj_jobs = make_dict_of_jobs(
             stats_template,
             get_vacancies_from_sj,
-            predict_rub_salary_for_sj
+            predict_rub_salary_for_sj,
+            sj_key
             )
     except requests.HTTPError:
         print(
@@ -270,3 +292,4 @@ if __name__ == '__main__':
 
     print_terminal_table(hh_jobs)
     print_terminal_table(sj_jobs)
+
