@@ -31,6 +31,24 @@ def get_area_id_hh(country_name, area_name, region_name=''):
     return area_id
 
 
+def get_city_name_sj(town_id):
+
+    city_url = 'https://api.superjob.ru/2.0/towns/'
+
+    city_response = requests.get(city_url)
+    city_response.raise_for_status()
+
+    cities_info = city_response.json()['objects']
+
+    city = ''
+
+    for town in cities_info:
+        if town['id'] == town_id:
+            city = town['title']
+
+    return city
+
+
 def print_terminal_table(table_params):
 
     title = f"{table_params['website']} {table_params['city']}"
@@ -95,7 +113,6 @@ def get_vacancies_hh(prog_language):
 def get_vacancies_sj(prog_lang):
 
     auth_url = 'https://api.superjob.ru/2.0/vacancies/'
-    city_url = 'https://api.superjob.ru/2.0/towns/'
 
     secret_key = environ.get('SUPERJOB_TOKEN')
 
@@ -110,14 +127,7 @@ def get_vacancies_sj(prog_lang):
         'keyword': f'Программист {prog_lang}',
     }
 
-    city_response = requests.get(city_url,)
-    city_response.raise_for_status()
-
-    city = ''
-
-    for town in city_response.json()['objects']:
-        if town['id'] == search_params['town']:
-            city = town['title']
+    city = get_city_name_sj(search_params['town'])
 
     website = 'SuperJob'
 
@@ -175,10 +185,10 @@ def predict_rub_salary_sj(vacancy):
     if vacancy['currency'] == 'rub':
         salary_from = vacancy['payment_from']
         salary_to = vacancy['payment_to']
-        med_salary = predict_salary(salary_from, salary_to)
+        medium_salary = predict_salary(salary_from, salary_to)
 
-        if med_salary:
-            return med_salary
+        if medium_salary:
+            return medium_salary
     else:
         return None
 
@@ -223,7 +233,7 @@ if __name__ == '__main__':
 
     load_dotenv()
 
-    languages = {
+    stats_template = {
         'Javascript': 0,
         'Java': 0,
         'Python': 0,
@@ -238,7 +248,7 @@ if __name__ == '__main__':
 
     try:
         hh_jobs = make_dict_of_jobs(
-            languages,
+            stats_template,
             get_vacancies_hh,
             predict_rub_salary_hh
             )
