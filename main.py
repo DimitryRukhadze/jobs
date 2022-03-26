@@ -6,7 +6,7 @@ from os import environ
 from terminaltables import AsciiTable
 
 
-def get_area_id_hh(country_name, area_name, region_name=''):
+def get_area_id_from_hh(country_name, area_name, region_name=''):
 
     area_url = 'https://api.hh.ru/areas'
 
@@ -31,7 +31,7 @@ def get_area_id_hh(country_name, area_name, region_name=''):
     return area_id
 
 
-def get_city_name_sj(town_id):
+def get_city_name_from_sj(town_id):
 
     city_url = 'https://api.superjob.ru/2.0/towns/'
 
@@ -74,13 +74,13 @@ def print_terminal_table(table_params):
     print(table.table)
 
 
-def get_vacancies_hh(prog_language):
+def get_vacancies_from_hh(prog_language):
 
     vacancies_url = 'https://api.hh.ru/vacancies'
     country = 'Россия'
     city = 'Москва'
     website = 'HeadHunter'
-    search_area_id = get_area_id_hh(country, city)
+    search_area_id = get_area_id_from_hh(country, city)
 
     params = {
         'per_page': 100,
@@ -102,15 +102,13 @@ def get_vacancies_hh(prog_language):
 
         new_vacancies = page_response.json()['items']
 
-        [
+        for vacancy in new_vacancies:
             hh_vacancies.append(vacancy)
-            for vacancy in new_vacancies
-            ]
 
     return response.json()['found'], hh_vacancies, city, website
 
 
-def get_vacancies_sj(prog_lang):
+def get_vacancies_from_sj(prog_lang):
 
     auth_url = 'https://api.superjob.ru/2.0/vacancies/'
 
@@ -127,7 +125,7 @@ def get_vacancies_sj(prog_lang):
         'keyword': f'Программист {prog_lang}',
     }
 
-    city = get_city_name_sj(search_params['town'])
+    city = get_city_name_from_sj(search_params['town'])
 
     website = 'SuperJob'
 
@@ -152,25 +150,23 @@ def get_vacancies_sj(prog_lang):
 
         new_vacancies = page_response.json()['objects']
 
-        [
+        for vacancy in new_vacancies:
             sj_vacancies.append(vacancy)
-            for vacancy in new_vacancies
-            ]
 
     return response.json()['total'], sj_vacancies, city, website
 
 
 def predict_salary(salary_from, salary_to):
 
-        if salary_from and salary_to:
-            return sum([salary_from, salary_to])/2
-        elif not salary_to and salary_from:
-            return salary_from*1.2
-        elif not salary_from and salary_to:
-            return salary_to*0.8
+    if salary_from and salary_to:
+        return sum([salary_from, salary_to])/2
+    elif not salary_to and salary_from:
+        return salary_from*1.2
+    elif not salary_from and salary_to:
+        return salary_to*0.8
 
 
-def predict_rub_salary_hh(vacancy):
+def predict_rub_salary_for_hh(vacancy):
     if vacancy['salary'] and vacancy['salary']['currency'] == 'RUR':
         salary_from = vacancy['salary']['from']
         salary_to = vacancy['salary']['to']
@@ -179,8 +175,7 @@ def predict_rub_salary_hh(vacancy):
         return medium_salary
 
 
-
-def predict_rub_salary_sj(vacancy):
+def predict_rub_salary_for_sj(vacancy):
     if vacancy['currency'] == 'rub':
         salary_from = vacancy['payment_from']
         salary_to = vacancy['payment_to']
@@ -191,7 +186,6 @@ def predict_rub_salary_sj(vacancy):
 
 
 def make_vacancies_stats_by_lang(language, vacancy_getter, salary_predicter):
-
 
     jobs_found, language_jobs, city, website = vacancy_getter(language)
 
@@ -226,6 +220,7 @@ def make_dict_of_jobs(dict_tempate, job_getter, salary_predicter):
 
     return langs
 
+
 if __name__ == '__main__':
 
     load_dotenv()
@@ -246,8 +241,8 @@ if __name__ == '__main__':
     try:
         hh_jobs = make_dict_of_jobs(
             stats_template,
-            get_vacancies_hh,
-            predict_rub_salary_hh
+            get_vacancies_from_hh,
+            predict_rub_salary_for_hh
             )
     except requests.HTTPError():
         print('Headhunter server unavailable. You may have exceeded the number of requests.')
@@ -256,8 +251,8 @@ if __name__ == '__main__':
     try:
         sj_jobs = make_dict_of_jobs(
             stats_template,
-            get_vacancies_sj,
-            predict_rub_salary_sj
+            get_vacancies_from_sj,
+            predict_rub_salary_for_sj
             )
     except requests.HTTPError:
         print('Headhunter server unavailable. You may have exceeded the number of requests.')
