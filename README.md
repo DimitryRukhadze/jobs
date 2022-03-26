@@ -29,7 +29,7 @@ C:\forstudy\jobs>python main.py
 Модуль последовательно создаёт две записи, содержащие статистику вакансий по должности "Программист" с сайта [HeadHunter](https://hh.ru) и [Superjob](https://superjob.ru).
 Затем он выводит статистику в терминал в виде таблиц с разбивкой статистики по языкам программирования.
 
-<img src="https://ibb.co/Nn4dFfz" width="200" height="50"/>
+![](https://imgbb.com/Nn4dFfz)
 
 def get_area_id_hh(country_name, area_name, region_name='')
 ---
