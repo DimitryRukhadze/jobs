@@ -111,6 +111,8 @@ def get_vacancies_sj(prog_lang):
     }
 
     city_response = requests.get(city_url,)
+    city_response.raise_for_status()
+
     city = ''
 
     for town in city_response.json()['objects']:
