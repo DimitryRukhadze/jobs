@@ -31,7 +31,7 @@ def get_area_id_hh(country_name, area_name, region_name=''):
     return area_id
 
 
-def make_terminal_table(table_params):
+def print_terminal_table(table_params):
 
     title = f"{table_params['website']} {table_params['city']}"
     table_data = [
@@ -253,5 +253,5 @@ if __name__ == '__main__':
         print('Headhunter server unavailable. You may have exceeded the number of requests.')
         raise
 
-    make_terminal_table(hh_jobs)
-    make_terminal_table(sj_jobs)
+    print_terminal_table(hh_jobs)
+    print_terminal_table(sj_jobs)
