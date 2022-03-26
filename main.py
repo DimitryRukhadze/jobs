@@ -209,7 +209,11 @@ def make_dict_of_jobs(dict_tempate, job_getter, salary_predicter):
     langs = dict_tempate.copy()
 
     for lang in langs.keys():
-        stats = make_vacancies_stats_by_lang(lang, job_getter, salary_predicter)
+        stats = make_vacancies_stats_by_lang(
+            lang,
+            job_getter,
+            salary_predicter
+            )
 
         if lang == 'city':
             langs[lang] = stats[1]
@@ -245,7 +249,10 @@ if __name__ == '__main__':
             predict_rub_salary_for_hh
             )
     except requests.HTTPError():
-        print('Headhunter server unavailable. You may have exceeded the number of requests.')
+        print(
+            '''Headhunter server unavailable.
+            You may have exceeded the number of requests.'''
+            )
         raise
 
     try:
@@ -255,7 +262,10 @@ if __name__ == '__main__':
             predict_rub_salary_for_sj
             )
     except requests.HTTPError:
-        print('Headhunter server unavailable. You may have exceeded the number of requests.')
+        print(
+            '''Headhunter server unavailable.
+            You may have exceeded the number of requests.'''
+            )
         raise
 
     print_terminal_table(hh_jobs)
