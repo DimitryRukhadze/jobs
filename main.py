@@ -174,11 +174,10 @@ def predict_rub_salary_hh(vacancy):
     if vacancy['salary'] and vacancy['salary']['currency'] == 'RUR':
         salary_from = vacancy['salary']['from']
         salary_to = vacancy['salary']['to']
-        med_salary = predict_salary(salary_from, salary_to)
+        medium_salary = predict_salary(salary_from, salary_to)
 
-        return med_salary
-    else:
-        return None
+        return medium_salary
+
 
 
 def predict_rub_salary_sj(vacancy):
@@ -189,8 +188,6 @@ def predict_rub_salary_sj(vacancy):
 
         if medium_salary:
             return medium_salary
-    else:
-        return None
 
 
 def make_vacancies_stats_by_lang(language, vacancy_getter, salary_predicter):
