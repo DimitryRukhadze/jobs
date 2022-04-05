@@ -93,7 +93,9 @@ def get_vacancies_from_hh(prog_language):
 
     hh_vacancies = []
 
-    for page in range(response.json()['pages']):
+    response_stats = response.json()
+
+    for page in range(response_stats['pages']):
 
         params['page'] = page
 
@@ -105,7 +107,7 @@ def get_vacancies_from_hh(prog_language):
         for vacancy in new_vacancies:
             hh_vacancies.append(vacancy)
 
-    return response.json()['found'], hh_vacancies, city, website
+    return response_stats['found'], hh_vacancies, city, website
 
 
 def get_vacancies_from_sj(prog_lang, secret_key=''):
@@ -158,9 +160,9 @@ def predict_salary(salary_from, salary_to):
 
     if salary_from and salary_to:
         return sum([salary_from, salary_to])/2
-    elif not salary_to and salary_from:
+    elif salary_from:
         return salary_from*1.2
-    elif not salary_from and salary_to:
+    elif salary_to:
         return salary_to*0.8
 
 
