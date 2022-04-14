@@ -26,24 +26,6 @@ def get_area_id_from_hh(area_name):
                     return city['id']
 
 
-def get_city_name_from_sj(town_id):
-
-    city_url = 'https://api.superjob.ru/2.0/towns/'
-
-    city_response = requests.get(city_url)
-    city_response.raise_for_status()
-
-    cities_info = city_response.json()['objects']
-
-    city = ''
-
-    for town in cities_info:
-        if town['id'] == town_id:
-            city = town['title']
-
-    return city
-
-
 def print_terminal_table(table_params):
 
     title = f"{table_params['website']} {table_params['city']}"
@@ -72,10 +54,9 @@ def print_terminal_table(table_params):
 def get_vacancies_from_hh(prog_language):
 
     vacancies_url = 'https://api.hh.ru/vacancies'
-    country = 'Россия'
     city = 'Москва'
     website = 'HeadHunter'
-    search_area_id = get_area_id_from_hh(country, city)
+    search_area_id = get_area_id_from_hh(city)
 
     params = {
         'per_page': 100,
@@ -115,12 +96,12 @@ def get_vacancies_from_sj(prog_lang, secret_key=''):
 
     search_params = {
         'count': 100,
-        'town': 4,
+        'town': 'Москва',
         'catalogues': 48,
         'keyword': f'Программист {prog_lang}',
     }
 
-    city = get_city_name_from_sj(search_params['town'])
+    city = search_params['town']
 
     website = 'SuperJob'
 
