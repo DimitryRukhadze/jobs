@@ -6,7 +6,7 @@ from os import environ
 from terminaltables import AsciiTable
 
 
-def get_area_id_from_hh(country_name, area_name, region_name=''):
+def get_area_id_from_hh(area_name):
 
     area_url = 'https://api.hh.ru/areas'
 
@@ -15,20 +15,15 @@ def get_area_id_from_hh(country_name, area_name, region_name=''):
 
     countries = response.json()
 
-    regions = list(*[
-        country['areas']
-        for country in countries
-        if country['name'] == country_name
-        ])
-
-    if not region_name:
-        area_id = str(*[
-            region['id']
-            for region in regions
-            if region['name'] == area_name
-            ])
-
-    return area_id
+    for country in countries:
+        if area_name in country.values():
+            return country['id']
+        for region in country['areas']:
+            if area_name in region.values():
+                return region['id']
+            for city in region['areas']:
+                if area_name in city.values():
+                    return city['id']
 
 
 def get_city_name_from_sj(town_id):
