@@ -67,9 +67,8 @@ def get_vacancies_from_hh(prog_language):
     response = requests.get(vacancies_url, params=params)
     response.raise_for_status()
 
-    hh_vacancies = []
-
     response_stats = response.json()
+    all_salaries = []
 
     for page in range(response_stats['pages']):
 
@@ -81,9 +80,17 @@ def get_vacancies_from_hh(prog_language):
         new_vacancies = page_response.json()['items']
 
         for vacancy in new_vacancies:
-            hh_vacancies.append(vacancy)
+            salary = predict_rub_salary_for_hh(vacancy)
+            if salary:
+                all_salaries.append(salary)
 
-    return response_stats['found'], hh_vacancies, city, website
+        lang_stats = {
+            'vacancies found': response_stats['found'],
+            'vacancies processed': len(all_salaries),
+            'average salary': int(sum(all_salaries)/len(all_salaries))
+        }
+
+    return lang_stats, city, website
 
 
 def get_vacancies_from_sj(prog_lang, secret_key=''):
@@ -112,7 +119,8 @@ def get_vacancies_from_sj(prog_lang, secret_key=''):
         )
     response.raise_for_status()
 
-    sj_vacancies = []
+    vacancies_found = response.json()['total']
+    all_salaries = []
 
     for page in range(5):
         search_params['page'] = page
@@ -127,9 +135,17 @@ def get_vacancies_from_sj(prog_lang, secret_key=''):
         new_vacancies = page_response.json()['objects']
 
         for vacancy in new_vacancies:
-            sj_vacancies.append(vacancy)
+            salary = predict_rub_salary_for_sj(vacancy)
+            if salary:
+                all_salaries.append(salary)
 
-    return response.json()['total'], sj_vacancies, city, website
+        lang_stats = {
+            'vacancies found': vacancies_found,
+            'vacancies processed': len(all_salaries),
+            'average salary': int(sum(all_salaries) / len(all_salaries))
+        }
+
+    return lang_stats, city, website
 
 
 def predict_salary(salary_from, salary_to):
@@ -161,99 +177,31 @@ def predict_rub_salary_for_sj(vacancy):
             return medium_salary
 
 
-def make_vacancies_stats_by_lang(language, vacancy_getter, salary_predicter, key_for_getter=''):
-
-    lang_stats = {}
-
-    if vacancy_getter == get_vacancies_from_sj:
-        jobs_found, language_jobs, city, website = vacancy_getter(
-            language,
-            key_for_getter
-            )
-
-    else:
-        jobs_found, language_jobs, city, website = vacancy_getter(language)
-
-    all_salaries = [
-        salary_predicter(job)
-        for job in language_jobs
-        if salary_predicter(job)
-    ]
-
-    if all_salaries:
-        lang_stats = {
-            'vacancies found': jobs_found,
-            'vacancies processed': len(all_salaries),
-            'average salary': int(sum(all_salaries)/len(all_salaries)),
-        }
-
-    return [lang_stats, city, website]
-
-
-def make_dict_of_jobs(dict_tempate, headers_template, job_getter, salary_predicter, secret_key=''):
-    langs = dict_tempate.copy()
-    headers = headers_template.copy()
-
-    if job_getter == get_vacancies_from_sj:
-        for lang in langs.keys():
-            stats = make_vacancies_stats_by_lang(
-                lang,
-                job_getter,
-                salary_predicter,
-                key_for_getter=secret_key
-                )
-
-            langs[lang] = stats[0]
-            if not headers['city']:
-                headers['city'] = stats[1]
-            if not headers['website']:
-                headers['website'] = stats[2]
-    else:
-        for lang in langs.keys():
-            stats = make_vacancies_stats_by_lang(
-                lang,
-                job_getter,
-                salary_predicter
-                )
-
-            langs[lang] = stats[0]
-
-            if not headers['city']:
-                headers['city'] = stats[1]
-            if not headers['website']:
-                headers['website'] = stats[2]
-
-    return langs, headers
-
-
 if __name__ == '__main__':
 
     load_dotenv()
     sj_key = environ.get('SUPERJOB_TOKEN')
 
-    langs_template = {
-        'Javascript': 0,
-        'Java': 0,
-        'Python': 0,
-        'Ruby': 0,
-        'PHP': 0,
-        'C++': 0,
-        'C#': 0,
-        'Go': 0,
-    }
+    langs_template = [
+        'Javascript',
+        'Java',
+        'Python',
+        'Ruby',
+        'PHP',
+        'C++',
+        'C#',
+        'Go'
+    ]
 
-    table_headers_template = {
-        'city': '',
-        'website': '',
-    }
+    hh_jobs = {}
+    hh_city = ''
+    hh_website = ''
 
     try:
-        hh_jobs, hh_headers = make_dict_of_jobs(
-            langs_template,
-            table_headers_template,
-            get_vacancies_from_hh,
-            predict_rub_salary_for_hh
-            )
+        for lang in langs_template:
+            lang_statistics, hh_city, hh_website = get_vacancies_from_hh(lang)
+            hh_jobs[lang] = lang_statistics
+
     except requests.HTTPError():
         print(
             '''Headhunter server unavailable.
@@ -261,14 +209,14 @@ if __name__ == '__main__':
             )
         raise
 
+    sj_jobs = {}
+    sj_city = ''
+    sj_website = ''
+
     try:
-        sj_jobs, sj_headers = make_dict_of_jobs(
-            langs_template,
-            table_headers_template,
-            get_vacancies_from_sj,
-            predict_rub_salary_for_sj,
-            sj_key
-            )
+        for lang in langs_template:
+            lang_statistics, sj_city, sj_website = get_vacancies_from_sj(lang, sj_key)
+            sj_jobs[lang] = lang_statistics
     except requests.HTTPError:
         print(
             '''Superjob server unavailable.
@@ -276,5 +224,5 @@ if __name__ == '__main__':
             )
         raise
 
-    print_terminal_table(hh_jobs, hh_headers['city'], hh_headers['website'])
-    print_terminal_table(sj_jobs, sj_headers['city'], sj_headers['website'])
+    print_terminal_table(hh_jobs, hh_city, hh_website)
+    print_terminal_table(sj_jobs, sj_city, sj_website)
