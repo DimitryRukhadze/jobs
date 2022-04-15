@@ -41,10 +41,10 @@ def print_terminal_table(table_params, header_website, header_city):
     for param in table_params.keys():
         if isinstance(table_params[param], dict):
             table_row = [param]
-            [
+
+            for lang_info in table_params[param].values():
                 table_row.append(lang_info)
-                for lang_info in table_params[param].values()
-                ]
+
             table_data.append(table_row)
 
     table = AsciiTable(table_data, title)
