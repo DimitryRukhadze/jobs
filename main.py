@@ -26,9 +26,9 @@ def get_area_id_from_hh(area_name):
                     return city['id']
 
 
-def print_terminal_table(table_params, table_headers):
+def print_terminal_table(table_params, header_website, header_city):
 
-    title = f"{table_headers['website']} {table_headers['city']}"
+    title = f"{header_website} {header_city}"
     table_data = [
         [
             'Язык программирования',
@@ -276,5 +276,5 @@ if __name__ == '__main__':
             )
         raise
 
-    print_terminal_table(hh_jobs, hh_headers)
-    print_terminal_table(sj_jobs, sj_headers)
+    print_terminal_table(hh_jobs, hh_headers['city'], hh_headers['website'])
+    print_terminal_table(sj_jobs, sj_headers['city'], sj_headers['website'])
