@@ -26,9 +26,9 @@ def get_area_id_from_hh(area_name):
                     return city['id']
 
 
-def print_terminal_table(table_params):
+def print_terminal_table(table_params, table_headers):
 
-    title = f"{table_params['website']} {table_params['city']}"
+    title = f"{table_headers['website']} {table_headers['city']}"
     table_data = [
         [
             'Язык программирования',
@@ -190,8 +190,9 @@ def make_vacancies_stats_by_lang(language, vacancy_getter, salary_predicter, key
     return [lang_stats, city, website]
 
 
-def make_dict_of_jobs(dict_tempate, job_getter, salary_predicter, secret_key=''):
+def make_dict_of_jobs(dict_tempate, headers_template, job_getter, salary_predicter, secret_key=''):
     langs = dict_tempate.copy()
+    headers = headers_template.copy()
 
     if job_getter == get_vacancies_from_sj:
         for lang in langs.keys():
@@ -202,12 +203,11 @@ def make_dict_of_jobs(dict_tempate, job_getter, salary_predicter, secret_key='')
                 key_for_getter=secret_key
                 )
 
-            if lang == 'city':
-                langs[lang] = stats[1]
-            elif lang == 'website':
-                langs[lang] = stats[2]
-            else:
-                langs[lang] = stats[0]
+            langs[lang] = stats[0]
+            if not headers['city']:
+                headers['city'] = stats[1]
+            if not headers['website']:
+                headers['website'] = stats[2]
     else:
         for lang in langs.keys():
             stats = make_vacancies_stats_by_lang(
@@ -216,14 +216,14 @@ def make_dict_of_jobs(dict_tempate, job_getter, salary_predicter, secret_key='')
                 salary_predicter
                 )
 
-            if lang == 'city':
-                langs[lang] = stats[1]
-            elif lang == 'website':
-                langs[lang] = stats[2]
-            else:
-                langs[lang] = stats[0]
+            langs[lang] = stats[0]
 
-    return langs
+            if not headers['city']:
+                headers['city'] = stats[1]
+            if not headers['website']:
+                headers['website'] = stats[2]
+
+    return langs, headers
 
 
 if __name__ == '__main__':
@@ -231,7 +231,7 @@ if __name__ == '__main__':
     load_dotenv()
     sj_key = environ.get('SUPERJOB_TOKEN')
 
-    stats_template = {
+    langs_template = {
         'Javascript': 0,
         'Java': 0,
         'Python': 0,
@@ -240,13 +240,17 @@ if __name__ == '__main__':
         'C++': 0,
         'C#': 0,
         'Go': 0,
+    }
+
+    table_headers_template = {
         'city': '',
         'website': '',
     }
 
     try:
-        hh_jobs = make_dict_of_jobs(
-            stats_template,
+        hh_jobs, hh_headers = make_dict_of_jobs(
+            langs_template,
+            table_headers_template,
             get_vacancies_from_hh,
             predict_rub_salary_for_hh
             )
@@ -258,18 +262,19 @@ if __name__ == '__main__':
         raise
 
     try:
-        sj_jobs = make_dict_of_jobs(
-            stats_template,
+        sj_jobs, sj_headers = make_dict_of_jobs(
+            langs_template,
+            table_headers_template,
             get_vacancies_from_sj,
             predict_rub_salary_for_sj,
             sj_key
             )
     except requests.HTTPError:
         print(
-            '''Headhunter server unavailable.
+            '''Superjob server unavailable.
             You may have exceeded the number of requests.'''
             )
         raise
 
-    print_terminal_table(hh_jobs)
-    print_terminal_table(sj_jobs)
+    print_terminal_table(hh_jobs, hh_headers)
+    print_terminal_table(sj_jobs, sj_headers)
