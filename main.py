@@ -81,11 +81,11 @@ def get_vacancies_from_hh(prog_language, city):
             if salary:
                 all_salaries.append(salary)
 
-        lang_stats = {
-            'vacancies found': response_stats['found'],
-            'vacancies processed': len(all_salaries),
-            'average salary': int(sum(all_salaries)/len(all_salaries))
-        }
+    lang_stats = {
+        'vacancies found': response_stats['found'],
+        'vacancies processed': len(all_salaries),
+        'average salary': int(sum(all_salaries)/len(all_salaries))
+    }
 
     return lang_stats
 
@@ -104,8 +104,6 @@ def get_vacancies_from_sj(prog_lang, city, secret_key=''):
         'catalogues': 48,
         'keyword': f'Программист {prog_lang}',
     }
-
-    city = search_params['town']
 
     response = requests.get(
         auth_url,
@@ -134,11 +132,11 @@ def get_vacancies_from_sj(prog_lang, city, secret_key=''):
             if salary:
                 all_salaries.append(salary)
 
-        lang_stats = {
-            'vacancies found': vacancies_found,
-            'vacancies processed': len(all_salaries),
-            'average salary': int(sum(all_salaries) / len(all_salaries))
-        }
+    lang_stats = {
+        'vacancies found': vacancies_found,
+        'vacancies processed': len(all_salaries),
+        'average salary': int(sum(all_salaries) / len(all_salaries))
+    }
 
     return lang_stats
 
