@@ -39,23 +39,20 @@ def print_terminal_table(table_params, header_website, header_city):
         ]
 
     for param in table_params.keys():
-        if isinstance(table_params[param], dict):
-            table_row = [param]
+        table_row = [param]
 
-            for lang_info in table_params[param].values():
-                table_row.append(lang_info)
+        for lang_info in table_params[param].values():
+            table_row.append(lang_info)
 
-            table_data.append(table_row)
+        table_data.append(table_row)
 
     table = AsciiTable(table_data, title)
     print(table.table)
 
 
-def get_vacancies_from_hh(prog_language):
+def get_vacancies_from_hh(prog_language, city):
 
     vacancies_url = 'https://api.hh.ru/vacancies'
-    city = 'Москва'
-    website = 'HeadHunter'
     search_area_id = get_area_id_from_hh(city)
 
     params = {
@@ -90,10 +87,10 @@ def get_vacancies_from_hh(prog_language):
             'average salary': int(sum(all_salaries)/len(all_salaries))
         }
 
-    return lang_stats, city, website
+    return lang_stats
 
 
-def get_vacancies_from_sj(prog_lang, secret_key=''):
+def get_vacancies_from_sj(prog_lang, city, secret_key=''):
 
     auth_url = 'https://api.superjob.ru/2.0/vacancies/'
 
@@ -103,14 +100,12 @@ def get_vacancies_from_sj(prog_lang, secret_key=''):
 
     search_params = {
         'count': 100,
-        'town': 'Москва',
+        'town': city,
         'catalogues': 48,
         'keyword': f'Программист {prog_lang}',
     }
 
     city = search_params['town']
-
-    website = 'SuperJob'
 
     response = requests.get(
         auth_url,
@@ -145,7 +140,7 @@ def get_vacancies_from_sj(prog_lang, secret_key=''):
             'average salary': int(sum(all_salaries) / len(all_salaries))
         }
 
-    return lang_stats, city, website
+    return lang_stats
 
 
 def predict_salary(salary_from, salary_to):
@@ -194,12 +189,12 @@ if __name__ == '__main__':
     ]
 
     hh_jobs = {}
-    hh_city = ''
-    hh_website = ''
+    hh_city = 'Москва'
+    hh_website = 'HeadHunter'
 
     try:
         for lang in langs_template:
-            lang_statistics, hh_city, hh_website = get_vacancies_from_hh(lang)
+            lang_statistics = get_vacancies_from_hh(lang, hh_city)
             hh_jobs[lang] = lang_statistics
 
     except requests.HTTPError():
@@ -210,12 +205,12 @@ if __name__ == '__main__':
         raise
 
     sj_jobs = {}
-    sj_city = ''
-    sj_website = ''
+    sj_city = 'Москва'
+    sj_website = 'SuperJob'
 
     try:
         for lang in langs_template:
-            lang_statistics, sj_city, sj_website = get_vacancies_from_sj(lang, sj_key)
+            lang_statistics = get_vacancies_from_sj(lang, sj_city, sj_key)
             sj_jobs[lang] = lang_statistics
     except requests.HTTPError:
         print(
